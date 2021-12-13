@@ -18,6 +18,8 @@ package org.springframework.samples.petclinic.owner;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +86,58 @@ class VisitController {
 		}
 	}
 
+
+	/**
+	 * Three most challenging methods that I have written so far
+	 * The difficulty came mostly from not knowing the framework
+	 * and have not been working with such a complicated structure
+	 * mapping itself onto html, css and sql files.
+	 *
+	 * All of the implementations are my own work, they are quite naive and simple
+	 * but they do the job and I am looking forward to improving my quality of code
+	 * as well as already written methods.
+	 *
+	 * All of them all reverse engineered from existing methods in VisitController and PetController
+	 * so they may have unnecessary lines that do nothing but I roughly know what each one does and
+	 * can explain it in my own words
+	 *
+	 * If I am correct after my experience with this task, @GetMapping causes the method to work
+	 * when entering a particular URL page, so I tried keeping similar naming convention
+	 * to already written methods
+	 *
+	 * And I hope that @PathVariable causes Java to take input directly from the URL
+	 *
+	 * @author Igor Danieluk
+	 *
+	 * @param visitId required to cancel a particular visit, maps itself from the URL
+	 * @param model   not quite sure what it does to be honest but it is in every similar method
+	 *                and as far as I am concerned it allows to make changes/add to database
+	 * @param petId   to make changes to a right pet, taken from URL
+	 * @return 		  the same webpage that we clicked the 'cancel visit' button on
+	 */
+	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/cancel")
+	public String initCancelVisit(@PathVariable("visitId") int visitId, Map<String, Object> model, @PathVariable("petId") int petId){
+		//finding correct pet and getting its visits as a List<Visit>
+		Pet pet = this.pets.findById(petId);
+		pet.setVisitsInternal(this.visits.findByPetId(petId));
+		model.put("pet", pet);
+		Visit visit = new Visit();
+		//this foreach loop might be redundant as we are sure that we click on particular
+		//visit because there is a button for every one, but it made me visualise the problem better
+		//after finding the correct visit to cancel, change its description to "CANCELED", and overwrite it
+		//pretty naive implementation because we can still change the visit later, but it is clearly distinguished from the others
+		for (Visit v: pet.getVisits()
+			 ) {if (v.getId() == visitId){
+			v.setDescription("CANCELED");
+			visit = v;
+		}
+		}
+		//adding the overwritten visit and saving it, redirecting to the same page
+		pet.addVisit(visit);
+		this.visits.save(visit);
+		return "redirect:/owners/{ownerId}";
+	}
+
 	/**
 	 * Trial and error mostly but I did enjoy it
 	 *
@@ -110,8 +164,8 @@ class VisitController {
 		model.put("pet", pet);
 		Visit visit = new Visit();
 		for (Visit v: pet.getVisitsInternal()
-		) { if (v.getId() == visitId){
-			visit = v;
+			 ) { if (v.getId() == visitId){
+			 	visit = v;
 		}
 		}
 		pet.getVisitsInternal().remove(visit);
