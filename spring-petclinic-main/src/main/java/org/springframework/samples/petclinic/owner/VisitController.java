@@ -84,4 +84,65 @@ class VisitController {
 		}
 	}
 
+	/**
+	 * Trial and error mostly but I did enjoy it
+	 *
+	 * The most difficult part was to somehow make changes to already existing visit, overwriting it
+	 * or making a new one and deleting the old one
+	 * The second implementation might be safer in case of power shutoff or Internet shortage as we
+	 * are still keeping the copy of old visit and we can delete it just before or after adding the altered one
+	 *
+	 *
+	 * @author Igor Danieluk
+	 *
+	 * @param visitId to change the correct visit
+	 * @param model   ...
+	 * @param petId	  to make changes to correct pet
+	 * @return		  webpage to create a new Visit
+	 */
+	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/change")
+	public String initChangeVisit(@PathVariable("visitId") int visitId, Map<String, Object> model, @PathVariable("petId") int petId) {
+		//what it all does is finding the correct pet and its visits
+		//removing the one to be changed from visible previous visits
+		//on a createOrUpdateVisitFrom webpage
+		Pet pet = this.pets.findById(petId);
+		pet.setVisitsInternal(this.visits.findByPetId(petId));
+		model.put("pet", pet);
+		Visit visit = new Visit();
+		for (Visit v: pet.getVisitsInternal()
+		) { if (v.getId() == visitId){
+			visit = v;
+		}
+		}
+		pet.getVisitsInternal().remove(visit);
+		return "pets/createOrUpdateVisitForm";
+
+	}
+
+	/**
+	 * What I think it does, after the new Visit is made, it checks if it is correct
+	 * and if yes, it replaces the id of a new one with and old visit, overwriting it
+	 * and saving it to the database
+	 *
+	 * @author Igor Danieluk
+	 *
+	 * @param visit   the altered visit provided by user
+	 * @param result  I am not quite sure what it does but probably checks if everything is correct
+	 * @param pet     The pet that has to have the visit changed
+	 * @param visitId To overwrite the id of the new visit from the previous one
+	 * @return
+	 */
+	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/change")
+	public String processNewVisitFormTEST(@Valid Visit visit, BindingResult result, Pet pet, @PathVariable("visitId") int visitId) {
+		if (result.hasErrors()) {
+			return "pets/createOrUpdateVisitForm";
+		}
+		else {
+			visit.setId(visitId);
+			pet.addVisit(visit);
+			this.visits.save(visit);
+			return "redirect:/owners/{ownerId}";
+		}
+	}
+
 }
