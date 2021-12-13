@@ -34,15 +34,12 @@
       th:replace="~{fragments/inputField :: input ('Date', 'date', 'date')}"  />
     <input
       th:replace="~{fragments/inputField :: input ('Description', 'description', 'text')}" />
-    <!--
-              --------------First draft of the code so we input Vet surname into description-------------
-
-              Another field to type in selected vet, very naive implementation requiring user to type the
-              surname by themselves, prone to misspelling but the 'vet' field will be referenced as a
+    <!--      Another field to type in selected vet, very naive implementation requiring user to type the
+              surname by themselves, prone to misspelling but the 'vet' field is referenced as a
               foreign key in SQL so it would cause an error when mistyped
      -->
     <input
-      th:replace="~{fragments/inputField :: input ('Vet', 'description', 'text')}" />
+      th:replace="~{fragments/inputField :: input ('Vet', 'vet', 'text')}" />
     <!--      Hard coded list of available vets, very bad programming practice but doing a dropdown menu
               which would take a list of vets from database and also after choosing, fill in the
               field is out of scope of my html knowledge
@@ -70,10 +67,15 @@
   <tr>
     <th>Date</th>
     <th>Description</th>
+    <th>Vet</th>
   </tr>
   <tr th:if="${!visit['new']}" th:each="visit : ${pet.visits}">
     <td th:text="${#temporals.format(visit.date, 'yyyy-MM-dd')}"></td>
     <td th:text=" ${visit.description}"></td>
+    <!--
+        Added a field to display chosen vet
+    -->
+    <td th:text=" ${visit.vet}"></td>
   </tr>
 </table>
 

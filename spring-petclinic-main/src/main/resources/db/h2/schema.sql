@@ -54,11 +54,17 @@ ALTER TABLE pets ADD CONSTRAINT fk_pets_owners FOREIGN KEY (owner_id) REFERENCES
 ALTER TABLE pets ADD CONSTRAINT fk_pets_types FOREIGN KEY (type_id) REFERENCES types (id);
 CREATE INDEX pets_name ON pets (name);
 
+-- added a vet Column which references vets(last_name) as foreign key
+-- it was very easy to implement but has its downsides as we can have
+-- 2 vets with the same surname, so definitely more robust method would be
+-- to assign id, as it is PRIMARY KEY but I am still learning SQL and did not know how to do that
 CREATE TABLE visits (
   id          INTEGER IDENTITY PRIMARY KEY,
   pet_id      INTEGER NOT NULL,
   visit_date  DATE,
-  description VARCHAR(255)
+  description VARCHAR(255),
+  vet         VARCHAR(30)
 );
 ALTER TABLE visits ADD CONSTRAINT fk_visits_pets FOREIGN KEY (pet_id) REFERENCES pets (id);
+ALTER TABLE visits ADD CONSTRAINT fk_visits_vets FOREIGN KEY (vet)    REFERENCES vets (last_name);
 CREATE INDEX visits_pet_id ON visits (pet_id);
